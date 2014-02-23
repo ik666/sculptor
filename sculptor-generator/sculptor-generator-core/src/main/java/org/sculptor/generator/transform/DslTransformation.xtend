@@ -78,10 +78,12 @@ import sculptormetamodel.Resource
 import sculptormetamodel.SculptormetamodelFactory
 import sculptormetamodel.Service
 import sculptormetamodel.Trait
+import org.sculptor.generator.chain.ChainOverridable
 
 /**
  * Transforms DSL meta model to generator meta model.
  */
+@ChainOverridable
 class DslTransformation {
 
 	private static val SculptormetamodelFactory FACTORY = SculptormetamodelFactory::eINSTANCE
