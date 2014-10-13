@@ -33,18 +33,21 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.eclipse.xtext.util.Arrays;
 
 /**
  * This plugin uses the commandline tool <a
  * href="http://www.graphviz.org/doc/info/command.html">dot</a> from the open
  * source graph visualization software <a
- * href="http://www.graphviz.org/">Graphviz</a> to generate images (PNG format)
+ * href="http://www.graphviz.org/">Graphviz</a> to generate images (PNG or SVG format)
  * for all graph files (<code>src/generated/resources/*.dot</code>) created
  * during the previous run of the Sculptor code generator.
  */
 @Mojo(name = "generate-images", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public class GraphvizMojo extends AbstractGeneratorMojo {
 
+    private static String[] validOutputTypes = {"png", "svg"};
+    
 	/**
 	 * Command to execute to generate the images. Default is <a
 	 * href="http://www.graphviz.org/doc/info/command.html">dot</a>.
@@ -65,7 +68,15 @@ public class GraphvizMojo extends AbstractGeneratorMojo {
 	@Parameter(property = "sculptor.graphviz.skip", defaultValue = "false")
 	private boolean skip;
 
-	/**
+    /**
+     * Skip the generation of image files.
+     * <p>
+     * Konfiguration in done in POM file. 
+     */
+    @Parameter(property = "sculptor_graphviz_outputType", defaultValue = "png")
+    private String outputType;
+
+    /**
 	 * Check if the execution should be skipped.
 	 * 
 	 * @return true to skip
@@ -123,7 +134,7 @@ public class GraphvizMojo extends AbstractGeneratorMojo {
 				File dotFile = new File(getProject().getBasedir(),
 						generatedFile);
 				File imageFile = new File(getProject().getBasedir(),
-						generatedFile + ".png");
+						generatedFile + "." + outputType);
 				if (!imageFile.exists()
 						|| imageFile.lastModified() < dotFile.lastModified()) {
 					changedDotFiles.add(generatedFile);
@@ -221,12 +232,13 @@ public class GraphvizMojo extends AbstractGeneratorMojo {
 	 *            {@link AbstractGeneratorMojo#statusFile}
 	 */
 	protected CommandLine getDotCommandLine(Set<String> generatedFiles)
-			throws MojoExecutionException {
+			throws MojoExecutionException {	    
 		CommandLine cl = new CommandLine(command);
 		if (isVerbose()) {
 			cl.addArgument("-v");
 		}
-		cl.addArgument("-Tpng");
+		validateOutputType();
+		cl.addArgument("-T" + outputType);
 		cl.addArgument("-O");
 		for (String generatedFile : generatedFiles) {
 			if (generatedFile.endsWith(".dot")) {
@@ -238,5 +250,13 @@ public class GraphvizMojo extends AbstractGeneratorMojo {
 		}
 		return cl;
 	}
-
+	
+	protected void validateOutputType() throws MojoExecutionException
+	{
+	     if (!Arrays.contains(validOutputTypes,outputType)) {
+	         throw new MojoExecutionException(
+	                 String.format("Invalid output type for parameter 'sculptor.graphviz.outputtype' : '%s'",
+	                         outputType));
+	     }	         
+	}
 }

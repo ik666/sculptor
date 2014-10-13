@@ -121,6 +121,7 @@ public class GraphvizMojoTest extends
 
 		// Set default values on mojo
 		setVariableValueToObject(mojo, "command", "dot");
+        setVariableValueToObject(mojo, "outputType", "png");		
 		return mojo;
 	}
 
