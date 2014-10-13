@@ -11,3 +11,6 @@ dependency-reduced-pom.xml
 .p2-mirror/
 generated
 .sculptor-status
+sculptor-generator/sculptor-metamodel/pom.xml
+
+sculptor-maven/sculptor-maven-plugin/pom.xml
